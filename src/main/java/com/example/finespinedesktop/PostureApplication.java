@@ -6,13 +6,18 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.effect.DropShadow;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class PostureApplication extends Application {
     private Button openButton;
@@ -22,8 +27,10 @@ public class PostureApplication extends Application {
     private AnchorPane mainLayout;
     private DropShadow shadow;
     private ImageView imagePreview;
-    private String image;
+    private String anglePath = "../CS3237/DesktopPackage/angle.txt";
+    private String imagePath = "../CS3237/DesktopPackage/bad-posture.jpg";
     private Boolean isNeckAngleLow;
+    private Image postureImage;
 
     public static void main(String[] args) {
         launch(args);
@@ -34,27 +41,37 @@ public class PostureApplication extends Application {
         stage.initStyle(StageStyle.UNDECORATED);
         stage.resizableProperty().setValue(Boolean.FALSE);
         stage.initStyle(StageStyle.TRANSPARENT);
-        //FXMLLoader fxmlLoader = new FXMLLoader(PostureApplication.class.getResource("posture-view.fxml"));
-        //Parent root = fxmlLoader.load();
-        parseArguments();
+
+        getAssets();
         initComponents();
         setPositions();
         setStyles();
         setEventHandlers();
+        setContent(); // every 5 seconds
 
         mainLayout.getChildren().addAll(openButton, heading, content, imagePreview);
 
         scene = new Scene(mainLayout, 600, 450);
         scene.setFill(null);
-        //PostureController cont = fxmlLoader.getController();
-        //cont.setInput(getParameters());
+
         stage.setTitle("Bad Posture Alert");
         stage.setScene(scene);
         stage.show();
     }
 
-    private void parseArguments() {
+    private void getAssets() {
+        String data = "";
+        try {
+            data = new String(Files.readAllBytes(Paths.get(anglePath)));
+        } catch (IOException e) {
+            System.out.println(e.toString());
+        }
 
+        isNeckAngleLow = data.equals("LO");
+
+        File imageFile = new File(imagePath);
+        String imageLocation = imageFile.toURI().toString();
+        postureImage = new Image(imageLocation);
     }
 
     private void initComponents() {
@@ -62,10 +79,7 @@ public class PostureApplication extends Application {
 
         heading = new Label("Bad Posture!");
 
-        content = new Label("Try moving back to keep your back at the chair.\n" +
-                "\n" +
-                "If you are leaning forward to see your computer, try to increase the height of your desk/monitor " +
-                "or get a laptop stand.");
+        content = new Label();
 
         mainLayout = new AnchorPane();
 
@@ -88,6 +102,7 @@ public class PostureApplication extends Application {
 
         imagePreview.setFitHeight(360.0);
         imagePreview.setFitWidth(180.0);
+        imagePreview.setStyle("-fx-background-radius: 12; -fx-border-radius: 12;");
 
         mainLayout.setStyle("-fx-background-color: rgba(21, 31, 35, 1); -fx-background-radius: 12; -fx-border-width: 1; " +
                 "-fx-border-color: black; -fx-border-radius: 12;");
@@ -123,5 +138,21 @@ public class PostureApplication extends Application {
                         openButton.setEffect(null);
                     }
                 });
+    }
+
+    private void setContent() {
+        if (isNeckAngleLow) {
+            content.setText("Try moving back to keep your back at the chair.\n" +
+                    "\n" +
+                    "If you are leaning forward to see your computer, try to increase the height of your " +
+                    "desk/monitor or get a laptop stand.");
+        } else {
+            content.setText("Try moving your back forward and your torso behind to keep your back at the chair.\n" +
+                    "\n" +
+                    "If you are leaning behind due to the shape of your chair, try using a pillow or getting an " +
+                    "adjustable chair for your needs.");
+        }
+
+        imagePreview.setImage(postureImage);
     }
 }

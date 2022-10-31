@@ -24,11 +24,11 @@ tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
 }
 
-mainClassName = 'com.example.finespinedesktop.HelloApplication'
+mainClassName = 'com.example.finespinedesktop.PostureApplication'
 
 application {
     mainModule = 'com.example.finespinedesktop'
-    mainClass = 'com.example.finespinedesktop.HelloApplication'
+    mainClass = 'com.example.finespinedesktop.PostureApplication'
 }
 
 javafx {
