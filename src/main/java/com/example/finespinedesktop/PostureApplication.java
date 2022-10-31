@@ -10,13 +10,17 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class PostureApplication extends Application {
@@ -27,10 +31,12 @@ public class PostureApplication extends Application {
     private AnchorPane mainLayout;
     private DropShadow shadow;
     private ImageView imagePreview;
-    private String anglePath = "../CS3237/DesktopPackage/angle.txt";
-    private String imagePath = "../CS3237/DesktopPackage/bad-posture.jpg";
+    private String anglePath = "./angle.txt"; //"../CS3237/DesktopPackage/angle.txt"; OR "./angle.txt"
+    private String imagePath = "./bad-posture.jpg"; //"../CS3237/DesktopPackage/bad-posture.jpg"; OR "./bad-posture.jpg";
     private Boolean isNeckAngleLow;
     private Image postureImage;
+    private Rectangle clip;
+    private String webUrl = "http://localhost:3000/";
 
     public static void main(String[] args) {
         launch(args);
@@ -66,7 +72,6 @@ public class PostureApplication extends Application {
         } catch (IOException e) {
             System.out.println(e.toString());
         }
-
         isNeckAngleLow = data.equals("LO");
 
         File imageFile = new File(imagePath);
@@ -76,15 +81,10 @@ public class PostureApplication extends Application {
 
     private void initComponents() {
         openButton = new Button("View your posture trends online");
-
         heading = new Label("Bad Posture!");
-
         content = new Label();
-
         mainLayout = new AnchorPane();
-
         shadow = new DropShadow();
-
         imagePreview = new ImageView();
     }
 
@@ -103,6 +103,13 @@ public class PostureApplication extends Application {
         imagePreview.setFitHeight(360.0);
         imagePreview.setFitWidth(180.0);
         imagePreview.setStyle("-fx-background-radius: 12; -fx-border-radius: 12;");
+
+        clip = new Rectangle(
+                imagePreview.getFitWidth(), imagePreview.getFitHeight()
+        );
+        clip.setArcWidth(12);
+        clip.setArcHeight(12);
+        imagePreview.setClip(clip);
 
         mainLayout.setStyle("-fx-background-color: rgba(21, 31, 35, 1); -fx-background-radius: 12; -fx-border-width: 1; " +
                 "-fx-border-color: black; -fx-border-radius: 12;");
@@ -138,6 +145,19 @@ public class PostureApplication extends Application {
                         openButton.setEffect(null);
                     }
                 });
+
+        openButton.addEventHandler(MouseEvent.MOUSE_CLICKED,
+                new EventHandler<MouseEvent>() {
+                    @Override
+                    public void handle(MouseEvent e) {
+                        try {
+                            Desktop.getDesktop().browse(URI.create(webUrl));
+                        } catch (IOException err) {
+                            err.printStackTrace();
+                        }
+                    }
+                }
+        );
     }
 
     private void setContent() {
